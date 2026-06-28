@@ -1,8 +1,0 @@
-# Copy this file to local.properties and fill in your API key.
-# NEVER commit local.properties — it's in .gitignore.
-
-# Get your free key at: https://www.football-data.org/client/register
-FOOTBALL_DATA_API_KEY=your_api_key_here
-
-# Standard Android SDK path (Android Studio sets this automatically)
-# sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
