@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WC2026 Launcher</string>
+    <string name="settings_title">Launcher Settings</string>
+    <string name="next_match">Next Match</string>
+    <string name="live_now">LIVE</string>
+    <string name="no_matches">No upcoming matches</string>
+    <string name="theme_auto">Auto (match-driven)</string>
+    <string name="theme_pinned">Pinned team</string>
+    <string name="favorite_team">Favourite Team</string>
+    <string name="theme_intensity">Theme Intensity</string>
+    <string name="notifications">Match Notifications</string>
+</resources>

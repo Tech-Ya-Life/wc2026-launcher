@@ -1,0 +1,45 @@
+package com.wc2026.launcher.schedule
+
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Query
+
+// ─────────────────────────────────────────────
+//  Retrofit interface for football-data.org v4
+//  Docs: https://www.football-data.org/documentation/quickstart
+//
+//  WC 2026 competition code: WC
+// ─────────────────────────────────────────────
+
+interface FootballDataApi {
+
+    @GET("v4/competitions/WC/matches")
+    suspend fun getWorldCupMatches(
+        @Header("X-Auth-Token") apiKey: String,
+        @Query("status") status: String? = null   // SCHEDULED, LIVE, FINISHED
+    ): MatchesResponse
+
+    companion object {
+        private const val BASE_URL = "https://api.football-data.org/"
+
+        fun create(): FootballDataApi {
+            val logging = HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BASIC
+            }
+            val client = OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build()
+
+            return Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(MoshiConverterFactory.create())
+                .build()
+                .create(FootballDataApi::class.java)
+        }
+    }
+}
