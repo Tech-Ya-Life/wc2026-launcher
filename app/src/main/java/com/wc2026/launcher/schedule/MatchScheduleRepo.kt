@@ -27,6 +27,7 @@ class MatchScheduleRepo(
         val matches = response.matches.map { it.toMatch() }
         dao.upsertMatches(matches)
         Log.d(tag, "Synced ${matches.size} matches")
+        Unit
     }.onFailure {
         Log.e(tag, "Sync failed: ${it.message}")
     }
