@@ -15,12 +15,12 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.wc2026.launcher"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.wc2026.launcher"
         minSdk = 26          // Android 8.0 — covers ~95% of active devices
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
 
@@ -35,6 +35,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
