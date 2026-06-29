@@ -1,0 +1,10 @@
+# Copy this file to local.properties and fill in your values.
+# NEVER commit local.properties — it is already in .gitignore.
+
+# Android SDK path — Android Studio sets this automatically when you open the project.
+# Update YOUR_MAC_USERNAME to match your Mac account name.
+sdk.dir=/Users/YOUR_MAC_USERNAME/Library/Android/sdk
+
+# Get your free API key at: https://www.football-data.org/client/register
+# Free tier: 10 calls/min — more than enough for this app.
+FOOTBALL_DATA_API_KEY=your_api_key_here
