@@ -1,5 +1,7 @@
 package com.wc2026.launcher.schedule
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -40,10 +42,17 @@ interface FootballDataApi {
                 .addInterceptor(logging)
                 .build()
 
+            // KotlinJsonAdapterFactory is needed so Moshi can deserialise all
+            // Kotlin data classes (including StandingsResponse) via reflection.
+            // moshi-kotlin is already on the classpath via libs.moshi.
+            val moshi = Moshi.Builder()
+                .addLast(KotlinJsonAdapterFactory())
+                .build()
+
             return Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
-                .addConverterFactory(MoshiConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .build()
                 .create(FootballDataApi::class.java)
         }

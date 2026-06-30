@@ -58,7 +58,11 @@ private fun GroupCard(
     accentColor: Color,
     onBackground: Color
 ) {
-    val groupLetter = standing.group?.removePrefix("GROUP_") ?: "?"
+    // API returns "GROUP_A" → display "GROUP A"
+    val groupLabel = standing.group
+        ?.replace("GROUP_", "GROUP ")  // "GROUP_A" → "GROUP A"
+        ?.replace("_", " ")            // any other underscores
+        ?: "GROUP ?"
 
     Column(
         modifier = Modifier
@@ -69,7 +73,7 @@ private fun GroupCard(
     ) {
         // Group header
         Text(
-            text = "GROUP $groupLetter",
+            text = groupLabel,
             color = accentColor,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,

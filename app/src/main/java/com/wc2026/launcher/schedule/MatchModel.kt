@@ -28,10 +28,10 @@ data class ApiMatch(
 
 @JsonClass(generateAdapter = true)
 data class ApiTeam(
-    @Json(name = "id") val id: Int,
-    @Json(name = "name") val name: String,
-    @Json(name = "shortName") val shortName: String,
-    @Json(name = "tla") val tla: String,   // 3-letter code e.g. "BRA"
+    @Json(name = "id") val id: Int?,           // null for knockout TBD slots
+    @Json(name = "name") val name: String?,    // null for knockout TBD slots
+    @Json(name = "shortName") val shortName: String?,
+    @Json(name = "tla") val tla: String?,      // null for knockout TBD slots
     @Json(name = "crest") val crest: String?
 )
 
@@ -79,11 +79,11 @@ fun ApiMatch.toMatch() = Match(
     utcDate = utcDate,
     status = status,
     stage = stage,
-    homeTeamName = homeTeam.name,
-    homeTeamTla = homeTeam.tla,
+    homeTeamName  = homeTeam.name  ?: "TBD",
+    homeTeamTla   = homeTeam.tla   ?: "TBD",
     homeTeamCrest = homeTeam.crest,
-    awayTeamName = awayTeam.name,
-    awayTeamTla = awayTeam.tla,
+    awayTeamName  = awayTeam.name  ?: "TBD",
+    awayTeamTla   = awayTeam.tla   ?: "TBD",
     awayTeamCrest = awayTeam.crest,
     homeScore = score.fullTime.home,
     awayScore = score.fullTime.away
