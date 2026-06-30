@@ -6,6 +6,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.wc2026.launcher.schedule.Match
+import com.wc2026.launcher.schedule.Standing
 import com.wc2026.launcher.theme.LauncherTheme
 
 /**
@@ -15,10 +16,10 @@ import com.wc2026.launcher.theme.LauncherTheme
  *   ┌──────────────────────────┐
  *   │  Status bar spacer        │
  *   │  Clock                    │
- *   │  Match card (next/live)   │
- *   │                           │
+ *   │  Match card               │  ← next/live, or last result, or empty state
+ *   │  Standings widget (opt.)  │
+ *   │  ── flex spacer ──        │
  *   │  App grid (4 × N)         │
- *   │                           │
  *   │  Dock (favourite apps)    │
  *   │  Nav bar spacer           │
  *   └──────────────────────────┘
@@ -27,7 +28,11 @@ import com.wc2026.launcher.theme.LauncherTheme
 fun LauncherScreen(
     theme: LauncherTheme,
     nextMatch: Match?,
-    allMatches: List<Match>
+    lastMatch: Match? = null,
+    allMatches: List<Match>,
+    showLiveScores: Boolean = true,
+    standings: List<Standing> = emptyList(),
+    showStandings: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -43,11 +48,32 @@ fun LauncherScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ── Next Match Card ────────────────────────────
-        if (nextMatch != null) {
-            MatchCard(match = nextMatch, theme = theme)
-        } else {
-            NoMatchesCard(onBackground = theme.onBackground)
+        // ── Match Card ─────────────────────────────────
+        when {
+            nextMatch != null ->
+                MatchCard(match = nextMatch, theme = theme, showScore = showLiveScores)
+
+            lastMatch != null ->
+                MatchCard(
+                    match = lastMatch,
+                    theme = theme,
+                    showScore = showLiveScores,
+                    isRecentResult = true
+                )
+
+            else ->
+                NoMatchesCard(onBackground = theme.onBackground)
+        }
+
+        // ── Group Standings (optional) ─────────────────
+        if (showStandings && standings.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            StandingsWidget(
+                groups = standings,
+                accentColor = theme.accent,
+                onBackground = theme.onBackground,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))

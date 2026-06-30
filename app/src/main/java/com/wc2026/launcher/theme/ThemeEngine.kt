@@ -32,6 +32,24 @@ object ThemeEngine {
         awayTeamTla     = "2026"
     )
 
+    /**
+     * Pins the theme to a single team — home = away = that team's palette,
+     * giving a solid block of the team's primary colour.
+     */
+    fun fromTeam(tla: String): LauncherTheme {
+        val palette = TeamColorPalette.forTeam(tla)
+        val bg = lerp(palette.primary, palette.secondary, 0.3f)
+        val onBg = if (luminance(bg) > 0.4f) Color.Black else Color.White
+        return LauncherTheme(
+            backgroundStart = palette.primary,
+            backgroundEnd   = palette.secondary,
+            accent          = palette.secondary,
+            onBackground    = onBg,
+            homeTeamTla     = tla,
+            awayTeamTla     = tla
+        )
+    }
+
     fun fromMatch(match: Match): LauncherTheme {
         val home = TeamColorPalette.forTeam(match.homeTeamTla)
         val away = TeamColorPalette.forTeam(match.awayTeamTla)

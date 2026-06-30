@@ -18,9 +18,16 @@ import kotlinx.coroutines.delay
 import java.time.ZonedDateTime
 import java.time.Duration
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
-fun MatchCard(match: Match, theme: LauncherTheme) {
+fun MatchCard(
+    match: Match,
+    theme: LauncherTheme,
+    showScore: Boolean = true,
+    isRecentResult: Boolean = false   // true when showing last finished match
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,39 +37,41 @@ fun MatchCard(match: Match, theme: LauncherTheme) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            // Live badge or countdown
-            if (match.isLive) {
-                LiveBadge()
-            } else {
-                CountdownTimer(utcDate = match.utcDate, accentColor = theme.accent)
+            // Header row: LIVE badge / FULL TIME / countdown
+            when {
+                match.isLive     -> LiveBadge()
+                match.isFinished -> FullTimeBadge(match, theme.accent, isRecentResult)
+                else             -> CountdownTimer(utcDate = match.utcDate, accentColor = theme.accent)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Teams
+            // Teams + scores
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val showActualScore = showScore && (match.isLive || match.isFinished)
+
                 TeamBlock(
-                    name = match.homeTeamName,
-                    tla = match.homeTeamTla,
-                    score = if (match.isLive || match.isFinished) match.homeScore?.toString() else null,
+                    name  = match.homeTeamName,
+                    tla   = match.homeTeamTla,
+                    score = if (showActualScore) match.homeScore?.toString() else null,
                     color = theme.onBackground
                 )
 
                 Text(
-                    text = "VS",
-                    fontSize = 18.sp,
+                    text      = if (showActualScore) "–" else "VS",
+                    fontSize  = if (showActualScore) 28.sp else 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = theme.accent
+                    color     = theme.accent
                 )
 
                 TeamBlock(
-                    name = match.awayTeamName,
-                    tla = match.awayTeamTla,
-                    score = if (match.isLive || match.isFinished) match.awayScore?.toString() else null,
+                    name  = match.awayTeamName,
+                    tla   = match.awayTeamTla,
+                    score = if (showActualScore) match.awayScore?.toString() else null,
                     color = theme.onBackground
                 )
             }
@@ -70,7 +79,7 @@ fun MatchCard(match: Match, theme: LauncherTheme) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = match.stage.replace("_", " ").lowercase()
+                text  = match.stage.replace("_", " ").lowercase()
                     .replaceFirstChar { it.uppercase() },
                 fontSize = 11.sp,
                 color = theme.onBackground.copy(alpha = 0.5f)
@@ -82,7 +91,6 @@ fun MatchCard(match: Match, theme: LauncherTheme) {
 @Composable
 private fun TeamBlock(name: String, tla: String, score: String?, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(110.dp)) {
-        // Flag emoji approximation via TLA — we'll swap for real flags later
         Text(text = tla, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = color)
         Text(text = name, fontSize = 11.sp, color = color.copy(alpha = 0.7f), maxLines = 1)
         if (score != null) {
@@ -104,6 +112,34 @@ private fun LiveBadge() {
 }
 
 @Composable
+private fun FullTimeBadge(match: Match, accentColor: Color, isRecentResult: Boolean) {
+    // Parse the match date for display
+    val dateStr = runCatching {
+        ZonedDateTime.parse(match.utcDate)
+            .withZoneSameInstant(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.ENGLISH))
+    }.getOrElse { "" }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (isRecentResult) {
+            Text(
+                text = "LAST RESULT  ·  $dateStr",
+                fontSize = 10.sp,
+                color = accentColor.copy(alpha = 0.6f),
+                letterSpacing = 1.5.sp
+            )
+        }
+        Text(
+            text = "FULL TIME",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = accentColor.copy(alpha = 0.85f),
+            letterSpacing = 2.sp
+        )
+    }
+}
+
+@Composable
 private fun CountdownTimer(utcDate: String, accentColor: Color) {
     var timeLeft by remember { mutableStateOf("") }
 
@@ -114,10 +150,10 @@ private fun CountdownTimer(utcDate: String, accentColor: Color) {
             val diff = Duration.between(now, matchTime)
 
             timeLeft = when {
-                diff.isNegative -> "Starting soon"
-                diff.toDays() > 0 -> "${diff.toDays()}d ${diff.toHours() % 24}h"
+                diff.isNegative    -> "Starting soon"
+                diff.toDays() > 0  -> "${diff.toDays()}d ${diff.toHours() % 24}h"
                 diff.toHours() > 0 -> "${diff.toHours()}h ${diff.toMinutes() % 60}m"
-                else -> "${diff.toMinutes()}m ${diff.seconds % 60}s"
+                else               -> "${diff.toMinutes()}m ${diff.seconds % 60}s"
             }
             delay(1_000)
         }

@@ -23,6 +23,12 @@ interface FootballDataApi {
         @Query("status") status: String? = null   // SCHEDULED, LIVE, FINISHED
     ): MatchesResponse
 
+    /** Group standings — available once the group stage begins */
+    @GET("v4/competitions/WC/standings")
+    suspend fun getWorldCupStandings(
+        @Header("X-Auth-Token") apiKey: String
+    ): StandingsResponse
+
     companion object {
         private const val BASE_URL = "https://api.football-data.org/"
 

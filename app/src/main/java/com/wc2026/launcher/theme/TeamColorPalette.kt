@@ -3,11 +3,12 @@ package com.wc2026.launcher.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Color palettes for all 48 World Cup 2026 teams.
- * Each team has a primary color (home kit) and secondary color (away kit / accent).
+ * Color palettes for all 48 FIFA World Cup 2026 qualified teams.
+ * Hosts: USA, Canada, Mexico
+ * Source: https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams
  */
 data class TeamPalette(
-    val tla: String,            // 3-letter code matching API
+    val tla: String,           // 3-letter code matching football-data.org API
     val name: String,
     val primary: Color,
     val secondary: Color,
@@ -18,79 +19,67 @@ object TeamColorPalette {
 
     val palettes: Map<String, TeamPalette> = listOf(
 
-        // ── GROUP A (USA host group) ──
+        // ── HOST NATIONS ──────────────────────────────────────────────────────
         TeamPalette("USA", "United States",  Color(0xFF002868), Color(0xFFBF0A30)),
         TeamPalette("CAN", "Canada",         Color(0xFFFF0000), Color(0xFFFFFFFF), Color.Black),
         TeamPalette("MEX", "Mexico",         Color(0xFF006847), Color(0xFFCE1126)),
 
-        // ── SOUTH AMERICA ──
-        TeamPalette("BRA", "Brazil",         Color(0xFF009C3B), Color(0xFFFFDF00), Color.Black),
+        // ── CONMEBOL (6 qualifiers) ───────────────────────────────────────────
         TeamPalette("ARG", "Argentina",      Color(0xFF74ACDF), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("URU", "Uruguay",        Color(0xFF5FFFFF), Color(0xFF002366), Color.Black),
+        TeamPalette("BRA", "Brazil",         Color(0xFF009C3B), Color(0xFFFFDF00), Color.Black),
         TeamPalette("COL", "Colombia",       Color(0xFFFCD116), Color(0xFF003087), Color.Black),
         TeamPalette("ECU", "Ecuador",        Color(0xFFFFD100), Color(0xFF003087), Color.Black),
-        TeamPalette("CHI", "Chile",          Color(0xFFD52B1E), Color(0xFF002B7F)),
-        TeamPalette("VEN", "Venezuela",      Color(0xFFCC0001), Color(0xFF003082)),
         TeamPalette("PAR", "Paraguay",       Color(0xFFD52B1E), Color(0xFF002B7F)),
-        TeamPalette("BOL", "Bolivia",        Color(0xFFD52B1E), Color(0xFF007A33)),
-        TeamPalette("PER", "Peru",           Color(0xFFD91023), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("URU", "Uruguay",        Color(0xFF5BB8E8), Color(0xFF002366), Color.Black),
 
-        // ── EUROPE ──
+        // ── UEFA (16 qualifiers) ─────────────────────────────────────────────
+        TeamPalette("AUT", "Austria",        Color(0xFFED2939), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("BEL", "Belgium",        Color(0xFFEF3340), Color(0xFF000000)),
+        TeamPalette("BIH", "Bosnia & Herz.", Color(0xFF002395), Color(0xFFFFCD00), Color.Black),
+        TeamPalette("CRO", "Croatia",        Color(0xFFFF0000), Color(0xFF003399)),
+        TeamPalette("CZE", "Czechia",        Color(0xFFD7141A), Color(0xFF11457E)),
         TeamPalette("ENG", "England",        Color(0xFFFFFFFF), Color(0xFF003090), Color.Black),
         TeamPalette("FRA", "France",         Color(0xFF002395), Color(0xFFED2939)),
         TeamPalette("GER", "Germany",        Color(0xFFFFFFFF), Color(0xFF000000), Color.Black),
-        TeamPalette("ESP", "Spain",          Color(0xFFC60B1E), Color(0xFFFFC400)),
-        TeamPalette("POR", "Portugal",       Color(0xFF006600), Color(0xFFFF0000)),
         TeamPalette("NED", "Netherlands",    Color(0xFFFF6600), Color(0xFF002B7F)),
-        TeamPalette("BEL", "Belgium",        Color(0xFFEF3340), Color(0xFF000000)),
-        TeamPalette("ITA", "Italy",          Color(0xFF009246), Color(0xFF003082)),
-        TeamPalette("CRO", "Croatia",        Color(0xFFFF0000), Color(0xFF0000FF)),
-        TeamPalette("DEN", "Denmark",        Color(0xFFC60C30), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("SWI", "Switzerland",    Color(0xFFFF0000), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("AUT", "Austria",        Color(0xFFED2939), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("POL", "Poland",         Color(0xFFFFFFFF), Color(0xFFDC143C), Color.Black),
-        TeamPalette("SRB", "Serbia",         Color(0xFFC6363C), Color(0xFF0C4076)),
+        TeamPalette("NOR", "Norway",         Color(0xFFEF2B2D), Color(0xFF002868)),
+        TeamPalette("POR", "Portugal",       Color(0xFF006600), Color(0xFFFF0000)),
         TeamPalette("SCO", "Scotland",       Color(0xFF003399), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("TUR", "Turkey",         Color(0xFFE30A17), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("UKR", "Ukraine",        Color(0xFF005BBB), Color(0xFFFFD500), Color.Black),
-        TeamPalette("SVK", "Slovakia",       Color(0xFF003082), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("HUN", "Hungary",        Color(0xFFCE2939), Color(0xFF477050)),
-        TeamPalette("ROU", "Romania",        Color(0xFF002B7F), Color(0xFFFCD116), Color.Black),
-        TeamPalette("WAL", "Wales",          Color(0xFFD01012), Color(0xFF00AB39)),
+        TeamPalette("ESP", "Spain",          Color(0xFFC60B1E), Color(0xFFFFC400)),
+        TeamPalette("SWE", "Sweden",         Color(0xFF006AA7), Color(0xFFFECC02), Color.Black),
+        TeamPalette("SUI", "Switzerland",    Color(0xFFFF0000), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("TUR", "Türkiye",        Color(0xFFE30A17), Color(0xFFFFFFFF), Color.Black),
 
-        // ── AFRICA ──
-        TeamPalette("MAR", "Morocco",        Color(0xFFC1272D), Color(0xFF006233)),
-        TeamPalette("SEN", "Senegal",        Color(0xFF00853F), Color(0xFFFCDD09), Color.Black),
-        TeamPalette("CMR", "Cameroon",       Color(0xFF007A5E), Color(0xFFCE1126)),
-        TeamPalette("GHA", "Ghana",          Color(0xFF006B3F), Color(0xFFFCD116), Color.Black),
-        TeamPalette("NGA", "Nigeria",        Color(0xFF008751), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("CGO", "D.R. Congo",     Color(0xFF007FFF), Color(0xFFCE1126)),
+        // ── CAF (10 qualifiers) ───────────────────────────────────────────────
+        TeamPalette("ALG", "Algeria",        Color(0xFF006233), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("CPV", "Cabo Verde",     Color(0xFF003893), Color(0xFFCF2027)),
+        TeamPalette("COD", "Congo DR",       Color(0xFF007FFF), Color(0xFFCE1126)),
         TeamPalette("CIV", "Côte d'Ivoire", Color(0xFFF77F00), Color(0xFF009A44)),
         TeamPalette("EGY", "Egypt",          Color(0xFFCE1126), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("ALG", "Algeria",        Color(0xFF006233), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("GHA", "Ghana",          Color(0xFF006B3F), Color(0xFFFCD116), Color.Black),
+        TeamPalette("MAR", "Morocco",        Color(0xFFC1272D), Color(0xFF006233)),
+        TeamPalette("SEN", "Senegal",        Color(0xFF00853F), Color(0xFFFCDD09), Color.Black),
+        TeamPalette("RSA", "South Africa",   Color(0xFF007A4D), Color(0xFFFFB81C), Color.Black),
         TeamPalette("TUN", "Tunisia",        Color(0xFFE70013), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("MLI", "Mali",           Color(0xFF14B53A), Color(0xFFFCD116), Color.Black),
-        TeamPalette("UGA", "Uganda",         Color(0xFF000000), Color(0xFFFFCC00), Color.Black),
 
-        // ── ASIA / OCEANIA ──
-        TeamPalette("JPN", "Japan",          Color(0xFF003087), Color(0xFFBC002D)),
-        TeamPalette("KOR", "South Korea",    Color(0xFFCD2E3A), Color(0xFF003478)),
+        // ── AFC (9 qualifiers) ────────────────────────────────────────────────
         TeamPalette("AUS", "Australia",      Color(0xFF00843D), Color(0xFFFFD100), Color.Black),
+        TeamPalette("IRQ", "Iraq",           Color(0xFF000000), Color(0xFF007A3D)),
         TeamPalette("IRN", "Iran",           Color(0xFF239F40), Color(0xFFDA0000)),
-        TeamPalette("SAU", "Saudi Arabia",   Color(0xFF006C35), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("JPN", "Japan",          Color(0xFF003087), Color(0xFFBC002D)),
+        TeamPalette("JOR", "Jordan",         Color(0xFF007A3D), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("KOR", "South Korea",    Color(0xFFCD2E3A), Color(0xFF003478)),
         TeamPalette("QAT", "Qatar",          Color(0xFF8D1B3D), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("UAE", "UAE",            Color(0xFF00732F), Color(0xFFFF0000)),
-        TeamPalette("CHN", "China",          Color(0xFFDE2910), Color(0xFFFFDE00), Color.Black),
+        TeamPalette("KSA", "Saudi Arabia",   Color(0xFF006C35), Color(0xFFFFFFFF), Color.Black),
+        TeamPalette("UZB", "Uzbekistan",     Color(0xFF1EB53A), Color(0xFF0099B5)),
+
+        // ── OFC (1 qualifier) ─────────────────────────────────────────────────
         TeamPalette("NZL", "New Zealand",    Color(0xFF000000), Color(0xFFFFFFFF), Color.Black),
 
-        // ── CONCACAF ──
+        // ── CONCACAF (3 non-host qualifiers) ─────────────────────────────────
+        TeamPalette("CUW", "Curaçao",        Color(0xFF002B7F), Color(0xFF00A3E0)),
+        TeamPalette("HAI", "Haiti",          Color(0xFF00209F), Color(0xFFD21034)),
         TeamPalette("PAN", "Panama",         Color(0xFFD21034), Color(0xFF003893)),
-        TeamPalette("CRC", "Costa Rica",     Color(0xFF002B7F), Color(0xFFCE1126)),
-        TeamPalette("JAM", "Jamaica",        Color(0xFF000000), Color(0xFFFFD700), Color.Black),
-        TeamPalette("HON", "Honduras",       Color(0xFF0073CF), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("GUA", "Guatemala",      Color(0xFF4997D0), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("ELS", "El Salvador",    Color(0xFF0F47AF), Color(0xFFFFFFFF), Color.Black),
-        TeamPalette("TRI", "Trinidad & Tobago", Color(0xFFCE1126), Color(0xFF000000)),
 
     ).associateBy { it.tla }
 

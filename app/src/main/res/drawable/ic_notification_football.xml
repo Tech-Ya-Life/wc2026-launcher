@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Monochrome soccer-ball icon for notifications.
+  Android tints this white automatically on the status bar.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Outer circle outline -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z
+                          M12,20c-4.41,0-8,-3.59-8,-8s3.59,-8 8,-8 8,3.59 8,8-3.59,8-8,8z"/>
+
+    <!-- Centre pentagon patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,7.8 L13.9,9.2 L13.2,11.4 L10.8,11.4 L10.1,9.2 Z"/>
+
+    <!-- Lower patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M10.8,11.4 L13.2,11.4 L13.8,13.4 L12,14.5 L10.2,13.4 Z"/>
+
+    <!-- Upper-left patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M8.2,8.4 L10.1,9.2 L9.4,11.4 L7.2,11.4 L6.8,9.4 Z"/>
+
+    <!-- Upper-right patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M15.8,8.4 L17.2,9.4 L16.8,11.4 L14.6,11.4 L13.9,9.2 Z"/>
+
+    <!-- Lower-left patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7.2,11.8 L9.4,11.8 L10.2,13.4 L8.8,15.0 L7.0,13.4 Z"/>
+
+    <!-- Lower-right patch -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16.8,11.8 L17.0,13.4 L15.2,15.0 L13.8,13.4 L14.6,11.8 Z"/>
+
+</vector>

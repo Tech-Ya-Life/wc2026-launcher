@@ -53,7 +53,7 @@ fun NoMatchesCard(onBackground: Color) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "No live or upcoming matches right now.\nAdd your football-data.org API key\nto see the live schedule.",
+                text = "No matches scheduled right now.\nCheck back closer to kick-off.",
                 fontSize = 12.sp,
                 color = onBackground.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center,

@@ -16,6 +16,9 @@ class MatchScheduleRepo(
     /** Observe all matches from the local cache */
     fun allMatches(): Flow<List<Match>> = dao.getAllMatches()
 
+    /** The most recently finished match — fallback when nothing is upcoming/live */
+    fun lastFinishedMatch(): Flow<Match?> = dao.getLastFinishedMatch()
+
     /**
      * Fetch fresh data from football-data.org and update the local cache.
      * Called by MatchSyncWorker on a schedule, and on app launch.

@@ -26,6 +26,24 @@ interface MatchDao {
     """)
     fun getMatchesOnDate(datePrefix: String): Flow<List<Match>>
 
+    /** The most recently finished match — shown when no upcoming/live match exists */
+    @Query("""
+        SELECT * FROM matches
+        WHERE status = 'FINISHED'
+        ORDER BY utcDate DESC
+        LIMIT 1
+    """)
+    fun getLastFinishedMatch(): Flow<Match?>
+
+    /** One-shot query for upcoming matches — used by [MatchSyncWorker] to schedule alerts */
+    @Query("""
+        SELECT * FROM matches
+        WHERE status IN ('SCHEDULED', 'TIMED')
+        AND utcDate > :nowIso
+        ORDER BY utcDate ASC
+    """)
+    suspend fun getUpcomingMatches(nowIso: String): List<Match>
+
     @Upsert
     suspend fun upsertMatches(matches: List<Match>)
 
