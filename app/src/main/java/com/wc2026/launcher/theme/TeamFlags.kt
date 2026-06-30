@@ -1,0 +1,75 @@
+package com.wc2026.launcher.theme
+
+/**
+ * Emoji flag for each of the 48 WC2026 qualified teams.
+ * England and Scotland use their regional subdivision flags (🏴 + tag sequence).
+ */
+object TeamFlags {
+
+    private val flags: Map<String, String> = mapOf(
+        // ── Hosts ──────────────────────────────────────
+        "USA" to "🇺🇸",
+        "CAN" to "🇨🇦",
+        "MEX" to "🇲🇽",
+
+        // ── CONMEBOL ───────────────────────────────────
+        "ARG" to "🇦🇷",
+        "BRA" to "🇧🇷",
+        "COL" to "🇨🇴",
+        "ECU" to "🇪🇨",
+        "PAR" to "🇵🇾",
+        "URU" to "🇺🇾",
+
+        // ── UEFA ────────────────────────────────────────
+        "AUT" to "🇦🇹",
+        "BEL" to "🇧🇪",
+        "BIH" to "🇧🇦",
+        "CRO" to "🇭🇷",
+        "CZE" to "🇨🇿",
+        "ENG" to "🏴󠁧󠁢󠁥󠁮󠁧󠁿", // 🏴󠁧󠁢󠁥󠁮󠁧󠁿
+        "FRA" to "🇫🇷",
+        "GER" to "🇩🇪",
+        "NED" to "🇳🇱",
+        "NOR" to "🇳🇴",
+        "POR" to "🇵🇹",
+        "SCO" to "🏴󠁧󠁢󠁳󠁣󠁴󠁿", // 🏴󠁧󠁢󠁳󠁣󠁴󠁿
+        "ESP" to "🇪🇸",
+        "SWE" to "🇸🇪",
+        "SUI" to "🇨🇭",
+        "TUR" to "🇹🇷",
+
+        // ── CAF ─────────────────────────────────────────
+        "ALG" to "🇩🇿",
+        "CPV" to "🇨🇻",
+        "COD" to "🇨🇩",
+        "CIV" to "🇨🇮",
+        "EGY" to "🇪🇬",
+        "GHA" to "🇬🇭",
+        "MAR" to "🇲🇦",
+        "SEN" to "🇸🇳",
+        "RSA" to "🇿🇦",
+        "TUN" to "🇹🇳",
+
+        // ── AFC ─────────────────────────────────────────
+        "AUS" to "🇦🇺",
+        "IRQ" to "🇮🇶",
+        "IRN" to "🇮🇷",
+        "JPN" to "🇯🇵",
+        "JOR" to "🇯🇴",
+        "KOR" to "🇰🇷",
+        "QAT" to "🇶🇦",
+        "KSA" to "🇸🇦",
+        "UZB" to "🇺🇿",
+
+        // ── OFC ─────────────────────────────────────────
+        "NZL" to "🇳🇿",
+
+        // ── CONCACAF (non-hosts) ─────────────────────────
+        "CUW" to "🇨🇼",
+        "HAI" to "🇭🇹",
+        "PAN" to "🇵🇦",
+    )
+
+    /** Returns the flag emoji for a TLA, or ⚽ as a neutral fallback */
+    fun forTla(tla: String): String = flags[tla] ?: "⚽"
+}

@@ -11,11 +11,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
@@ -63,10 +69,33 @@ class LauncherActivity : ComponentActivity() {
                 label        = "bgEnd"
             )
 
+            // Slowly sweep the gradient angle back and forth — a living background
+            val infiniteTransition = rememberInfiniteTransition(label = "bgDrift")
+            val gradPhase by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue  = 1f,
+                animationSpec = infiniteRepeatable(
+                    tween(12_000, easing = LinearEasing),
+                    RepeatMode.Reverse
+                ),
+                label = "gradPhase"
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Brush.linearGradient(listOf(bgStart, bgEnd)))
+                    .drawBehind {
+                        // Diagonal sweeps from top-left↘ to top-right↙ and back
+                        val sweep = size.width * 0.35f * gradPhase
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                colors = listOf(bgStart, bgEnd),
+                                start  = Offset(sweep, 0f),
+                                end    = Offset(size.width - sweep, size.height)
+                            ),
+                            size = size
+                        )
+                    }
             ) {
                 FootballPitchOverlay()
 

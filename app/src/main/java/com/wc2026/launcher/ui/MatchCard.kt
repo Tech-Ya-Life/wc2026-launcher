@@ -1,5 +1,10 @@
 package com.wc2026.launcher.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,16 +13,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wc2026.launcher.schedule.Match
 import com.wc2026.launcher.theme.LauncherTheme
+import com.wc2026.launcher.theme.StarPlayers
+import com.wc2026.launcher.theme.TeamFlags
 import kotlinx.coroutines.delay
-import java.time.ZonedDateTime
 import java.time.Duration
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -26,94 +36,259 @@ fun MatchCard(
     match: Match,
     theme: LauncherTheme,
     showScore: Boolean = true,
-    isRecentResult: Boolean = false   // true when showing last finished match
+    isRecentResult: Boolean = false
 ) {
+    val showActualScore = showScore && (match.isLive || match.isFinished)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.Black.copy(alpha = 0.3f))
-            .padding(16.dp)
+            .background(Color.Black.copy(alpha = 0.30f))
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-            // Header row: LIVE badge / FULL TIME / countdown
+            // ── Header badge ───────────────────────────────
             when {
                 match.isLive     -> LiveBadge()
                 match.isFinished -> FullTimeBadge(match, theme.accent, isRecentResult)
-                else             -> CountdownTimer(utcDate = match.utcDate, accentColor = theme.accent)
+                else             -> CountdownTimer(match.utcDate, theme.accent)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Teams + scores
+            // ── Main row: team ── score ── team ───────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val showActualScore = showScore && (match.isLive || match.isFinished)
-
-                TeamBlock(
-                    name  = match.homeTeamName,
-                    tla   = match.homeTeamTla,
-                    score = if (showActualScore) match.homeScore?.toString() else null,
-                    color = theme.onBackground
+                // Home team
+                TeamPanel(
+                    modifier = Modifier.weight(1f),
+                    tla = match.homeTeamTla,
+                    name = match.homeTeamName,
+                    isLive = match.isLive,
+                    onBackground = theme.onBackground,
+                    accentColor = theme.accent
                 )
 
-                Text(
-                    text      = if (showActualScore) "–" else "VS",
-                    fontSize  = if (showActualScore) 28.sp else 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color     = theme.accent
+                // Centre: score or VS — animated between states
+                ScoreOrVs(
+                    showScore = showActualScore,
+                    homeScore = match.homeScore,
+                    awayScore = match.awayScore,
+                    onBackground = theme.onBackground,
+                    accentColor = theme.accent
                 )
 
-                TeamBlock(
-                    name  = match.awayTeamName,
-                    tla   = match.awayTeamTla,
-                    score = if (showActualScore) match.awayScore?.toString() else null,
-                    color = theme.onBackground
+                // Away team
+                TeamPanel(
+                    modifier = Modifier.weight(1f),
+                    tla = match.awayTeamTla,
+                    name = match.awayTeamName,
+                    isLive = match.isLive,
+                    onBackground = theme.onBackground,
+                    accentColor = theme.accent
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
+            // ── Stage ──────────────────────────────────────
             Text(
-                text  = match.stage.replace("_", " ").lowercase()
+                text = match.stage.replace("_", " ").lowercase()
                     .replaceFirstChar { it.uppercase() },
                 fontSize = 11.sp,
-                color = theme.onBackground.copy(alpha = 0.5f)
+                color = theme.onBackground.copy(alpha = 0.45f),
+                letterSpacing = 0.5.sp
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Team panel (flag + TLA + name + star player)
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun TeamPanel(
+    modifier: Modifier = Modifier,
+    tla: String,
+    name: String,
+    isLive: Boolean,
+    onBackground: Color,
+    accentColor: Color
+) {
+    val flag  = TeamFlags.forTla(tla)
+    val star  = StarPlayers.forTla(tla)
+
+    // Subtle scale pulse when live — flag "breathes" gently
+    val infiniteTransition = rememberInfiniteTransition(label = "flagPulse_$tla")
+    val flagScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (isLive) 1.08f else 1f,
+        animationSpec = infiniteRepeatable(
+            tween(1_600, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "flagScale"
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Flag emoji
+        Text(
+            text = flag,
+            fontSize = 46.sp,
+            modifier = Modifier.scale(flagScale),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // TLA (bold, prominent)
+        Text(
+            text = tla,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = onBackground,
+            letterSpacing = 1.sp
+        )
+
+        // Full team name (small, dimmed)
+        Text(
+            text = name,
+            fontSize = 10.sp,
+            color = onBackground.copy(alpha = 0.55f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+
+        // Star player (accent, italic-ish)
+        if (star.isNotBlank() && tla != "TBD") {
+            Text(
+                text = star,
+                fontSize = 10.sp,
+                color = accentColor.copy(alpha = 0.85f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Centre score / VS panel
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ScoreOrVs(
+    showScore: Boolean,
+    homeScore: Int?,
+    awayScore: Int?,
+    onBackground: Color,
+    accentColor: Color
+) {
+    // Key changes when the score actually changes → triggers fade animation
+    val scoreKey = "$showScore|$homeScore|$awayScore"
+
+    Box(
+        modifier = Modifier.width(76.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = scoreKey,
+            transitionSpec = { fadeIn(tween(400)) togetherWith fadeOut(tween(400)) },
+            label = "scoreAnim"
+        ) { key ->
+            val showing = key.startsWith("true")
+            if (showing) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "${homeScore ?: "–"}",
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.Black,
+                        color = onBackground,
+                        lineHeight = 40.sp
+                    )
+                    Text(
+                        text = "—",
+                        fontSize = 14.sp,
+                        color = accentColor.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${awayScore ?: "–"}",
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.Black,
+                        color = onBackground,
+                        lineHeight = 40.sp
+                    )
+                }
+            } else {
+                Text(
+                    text = "VS",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Header badges
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun LiveBadge() {
+    val infiniteTransition = rememberInfiniteTransition(label = "livePulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.20f,
+        animationSpec = infiniteRepeatable(
+            tween(700, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "liveAlpha"
+    )
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(Color(0xFFE53935))
+            .padding(horizontal = 16.dp, vertical = 5.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "●",
+                color = Color.White.copy(alpha = alpha),
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = "LIVE",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                letterSpacing = 2.sp
             )
         }
     }
 }
 
 @Composable
-private fun TeamBlock(name: String, tla: String, score: String?, color: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(110.dp)) {
-        Text(text = tla, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = color)
-        Text(text = name, fontSize = 11.sp, color = color.copy(alpha = 0.7f), maxLines = 1)
-        if (score != null) {
-            Text(text = score, fontSize = 36.sp, fontWeight = FontWeight.Bold, color = color)
-        }
-    }
-}
-
-@Composable
-private fun LiveBadge() {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(Color(0xFFE53935))
-            .padding(horizontal = 12.dp, vertical = 4.dp)
-    ) {
-        Text("● LIVE", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-    }
-}
-
-@Composable
 private fun FullTimeBadge(match: Match, accentColor: Color, isRecentResult: Boolean) {
-    // Parse the match date for display
     val dateStr = runCatching {
         ZonedDateTime.parse(match.utcDate)
             .withZoneSameInstant(ZoneId.systemDefault())
@@ -121,11 +296,11 @@ private fun FullTimeBadge(match: Match, accentColor: Color, isRecentResult: Bool
     }.getOrElse { "" }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (isRecentResult) {
+        if (isRecentResult && dateStr.isNotBlank()) {
             Text(
                 text = "LAST RESULT  ·  $dateStr",
                 fontSize = 10.sp,
-                color = accentColor.copy(alpha = 0.6f),
+                color = accentColor.copy(alpha = 0.55f),
                 letterSpacing = 1.5.sp
             )
         }
@@ -134,7 +309,7 @@ private fun FullTimeBadge(match: Match, accentColor: Color, isRecentResult: Bool
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = accentColor.copy(alpha = 0.85f),
-            letterSpacing = 2.sp
+            letterSpacing = 2.5.sp
         )
     }
 }
@@ -146,7 +321,7 @@ private fun CountdownTimer(utcDate: String, accentColor: Color) {
     LaunchedEffect(utcDate) {
         while (true) {
             val matchTime = ZonedDateTime.parse(utcDate)
-            val now = ZonedDateTime.now(ZoneId.of("UTC"))
+            val now  = ZonedDateTime.now(ZoneId.of("UTC"))
             val diff = Duration.between(now, matchTime)
 
             timeLeft = when {
@@ -160,7 +335,17 @@ private fun CountdownTimer(utcDate: String, accentColor: Color) {
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("NEXT MATCH IN", fontSize = 10.sp, color = accentColor.copy(alpha = 0.7f), letterSpacing = 2.sp)
-        Text(timeLeft, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = accentColor)
+        Text(
+            text = "NEXT MATCH IN",
+            fontSize = 10.sp,
+            color = accentColor.copy(alpha = 0.65f),
+            letterSpacing = 2.sp
+        )
+        Text(
+            text = timeLeft,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = accentColor
+        )
     }
 }

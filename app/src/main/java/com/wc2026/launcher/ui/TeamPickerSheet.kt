@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wc2026.launcher.theme.TeamColorPalette
+import com.wc2026.launcher.theme.TeamFlags
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,25 +97,20 @@ fun TeamPickerSheet(
                             .clickable { onTeamSelected(team.tla) }
                             .padding(vertical = 6.dp, horizontal = 2.dp)
                     ) {
-                        // Coloured circle with TLA
+                        // Flag emoji circle with team colour ring
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(team.primary)
-                                .then(
-                                    if (isSelected)
-                                        Modifier.padding(2.dp)
-                                    else Modifier
+                                .background(
+                                    if (isSelected) Color(0xFFFFD700)
+                                    else team.primary.copy(alpha = 0.6f)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = team.tla,
-                                color = team.onPrimary,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                                text = TeamFlags.forTla(team.tla),
+                                fontSize = 26.sp
                             )
                         }
 
