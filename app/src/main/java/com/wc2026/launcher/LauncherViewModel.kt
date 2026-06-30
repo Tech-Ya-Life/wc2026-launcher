@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.wc2026.launcher.schedule.Match
 import com.wc2026.launcher.schedule.MatchDatabase
 import com.wc2026.launcher.schedule.MatchScheduleRepo
+import com.wc2026.launcher.schedule.PlayerImageRepo
 import com.wc2026.launcher.schedule.Standing
 import com.wc2026.launcher.schedule.StandingsRepo
+import com.wc2026.launcher.theme.StarPlayerFullNames
 import com.wc2026.launcher.settings.AppSettings
 import com.wc2026.launcher.settings.SettingsRepository
 import com.wc2026.launcher.theme.LauncherTheme
@@ -18,10 +20,11 @@ import kotlinx.coroutines.launch
 
 class LauncherViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val db            = MatchDatabase.getInstance(app)
-    private val repo          = MatchScheduleRepo.getInstance(dao = db.matchDao())
-    private val standingsRepo = StandingsRepo()
-    private val settings      = SettingsRepository.getInstance(app)
+    private val db             = MatchDatabase.getInstance(app)
+    private val repo           = MatchScheduleRepo.getInstance(dao = db.matchDao())
+    private val standingsRepo  = StandingsRepo()
+    private val settings       = SettingsRepository.getInstance(app)
+    private val playerImageRepo = PlayerImageRepo()
 
     // ── Match data ────────────────────────────────────────────────────────────
 
@@ -57,6 +60,11 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
     private val _standings = MutableStateFlow<List<Standing>>(emptyList())
     val standings: StateFlow<List<Standing>> = _standings.asStateFlow()
 
+    // ── Player images — TLA → photo URL (fetched from TheSportsDB) ────────────
+
+    private val _playerImages = MutableStateFlow<Map<String, String>>(emptyMap())
+    val playerImages: StateFlow<Map<String, String>> = _playerImages.asStateFlow()
+
     // ── Init ──────────────────────────────────────────────────────────────────
 
     init {
@@ -81,5 +89,24 @@ class LauncherViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
         }
+
+        // Fetch player images whenever the displayed match changes teams
+        viewModelScope.launch {
+            combine(nextMatch, lastMatch) { next, last -> next ?: last }
+                .collect { match ->
+                    match ?: return@collect
+                    fetchPlayerImage(match.homeTeamTla)
+                    fetchPlayerImage(match.awayTeamTla)
+                }
+        }
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private suspend fun fetchPlayerImage(tla: String) {
+        if (_playerImages.value.containsKey(tla)) return      // already cached
+        val searchName = StarPlayerFullNames.forTla(tla) ?: return
+        val url = playerImageRepo.fetchUrl(searchName) ?: return
+        _playerImages.update { it + (tla to url) }
     }
 }

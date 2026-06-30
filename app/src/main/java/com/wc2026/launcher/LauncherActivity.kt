@@ -51,12 +51,13 @@ class LauncherActivity : ComponentActivity() {
         MatchSyncWorker.schedule(this)
 
         setContent {
-            val theme       by viewModel.theme.collectAsState()
-            val nextMatch   by viewModel.nextMatch.collectAsState()
-            val lastMatch   by viewModel.lastMatch.collectAsState()
-            val allMatches  by viewModel.allMatches.collectAsState()
-            val appSettings by viewModel.appSettings.collectAsState()
-            val standings   by viewModel.standings.collectAsState()
+            val theme        by viewModel.theme.collectAsState()
+            val nextMatch    by viewModel.nextMatch.collectAsState()
+            val lastMatch    by viewModel.lastMatch.collectAsState()
+            val allMatches   by viewModel.allMatches.collectAsState()
+            val appSettings  by viewModel.appSettings.collectAsState()
+            val standings    by viewModel.standings.collectAsState()
+            val playerImages by viewModel.playerImages.collectAsState()
 
             val bgStart by animateColorAsState(
                 targetValue  = theme.backgroundStart,
@@ -106,7 +107,8 @@ class LauncherActivity : ComponentActivity() {
                     allMatches     = allMatches,
                     showLiveScores = appSettings.showLiveScores,
                     standings      = standings,
-                    showStandings  = appSettings.showStandings
+                    showStandings  = appSettings.showStandings,
+                    playerImages   = playerImages
                 )
             }
         }

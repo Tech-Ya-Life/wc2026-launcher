@@ -1,12 +1,14 @@
 package com.wc2026.launcher.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -15,11 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.wc2026.launcher.schedule.Match
 import com.wc2026.launcher.theme.LauncherTheme
 import com.wc2026.launcher.theme.StarPlayers
@@ -36,9 +42,14 @@ fun MatchCard(
     match: Match,
     theme: LauncherTheme,
     showScore: Boolean = true,
-    isRecentResult: Boolean = false
+    isRecentResult: Boolean = false,
+    playerImages: Map<String, String> = emptyMap()
 ) {
     val showActualScore = showScore && (match.isLive || match.isFinished)
+
+    val homeImageUrl = playerImages[match.homeTeamTla]
+    val awayImageUrl = playerImages[match.awayTeamTla]
+    val hasCutouts   = homeImageUrl != null || awayImageUrl != null
 
     Box(
         modifier = Modifier
@@ -62,38 +73,46 @@ fun MatchCard(
             Spacer(modifier = Modifier.height(14.dp))
 
             // ── Main row: team ── score ── team ───────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Home team
-                TeamPanel(
-                    modifier = Modifier.weight(1f),
-                    tla = match.homeTeamTla,
-                    name = match.homeTeamName,
-                    isLive = match.isLive,
-                    onBackground = theme.onBackground,
-                    accentColor = theme.accent
+            if (hasCutouts) {
+                // When player images are available: cutout figures frame the score
+                PlayerCutoutRow(
+                    match          = match,
+                    showActualScore = showActualScore,
+                    homeImageUrl   = homeImageUrl,
+                    awayImageUrl   = awayImageUrl,
+                    onBackground   = theme.onBackground,
+                    accentColor    = theme.accent
                 )
-
-                // Centre: score or VS — animated between states
-                ScoreOrVs(
-                    showScore = showActualScore,
-                    homeScore = match.homeScore,
-                    awayScore = match.awayScore,
-                    onBackground = theme.onBackground,
-                    accentColor = theme.accent
-                )
-
-                // Away team
-                TeamPanel(
-                    modifier = Modifier.weight(1f),
-                    tla = match.awayTeamTla,
-                    name = match.awayTeamName,
-                    isLive = match.isLive,
-                    onBackground = theme.onBackground,
-                    accentColor = theme.accent
-                )
+            } else {
+                // Fallback: flag-emoji panels
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TeamPanel(
+                        modifier = Modifier.weight(1f),
+                        tla = match.homeTeamTla,
+                        name = match.homeTeamName,
+                        isLive = match.isLive,
+                        onBackground = theme.onBackground,
+                        accentColor = theme.accent
+                    )
+                    ScoreOrVs(
+                        showScore = showActualScore,
+                        homeScore = match.homeScore,
+                        awayScore = match.awayScore,
+                        onBackground = theme.onBackground,
+                        accentColor = theme.accent
+                    )
+                    TeamPanel(
+                        modifier = Modifier.weight(1f),
+                        tla = match.awayTeamTla,
+                        name = match.awayTeamName,
+                        isLive = match.isLive,
+                        onBackground = theme.onBackground,
+                        accentColor = theme.accent
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -241,6 +260,191 @@ private fun ScoreOrVs(
                     color = accentColor
                 )
             }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Player cutout row — shown when we have real player images
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun PlayerCutoutRow(
+    match: Match,
+    showActualScore: Boolean,
+    homeImageUrl: String?,
+    awayImageUrl: String?,
+    onBackground: Color,
+    accentColor: Color
+) {
+    val homeFlag = TeamFlags.forTla(match.homeTeamTla)
+    val awayFlag = TeamFlags.forTla(match.awayTeamTla)
+    val homeStar = StarPlayers.forTla(match.homeTeamTla)
+    val awayStar = StarPlayers.forTla(match.awayTeamTla)
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom  // align to bottom so player images "stand" on the same baseline
+    ) {
+        // ── Home player ───────────────────────────────────
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            PlayerFigure(
+                imageUrl    = homeImageUrl,
+                flagEmoji   = homeFlag,
+                isLive      = match.isLive,
+                isCutout    = homeImageUrl?.contains("/cutout/") == true
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = match.homeTeamTla,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = onBackground,
+                letterSpacing = 1.sp
+            )
+            if (homeStar.isNotBlank() && match.homeTeamTla != "TBD") {
+                Text(
+                    text = homeStar,
+                    fontSize = 9.sp,
+                    color = accentColor.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // ── Score / VS ────────────────────────────────────
+        Column(
+            modifier = Modifier
+                .width(76.dp)
+                .padding(bottom = 20.dp),   // offset up from team-name baseline
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ScoreOrVs(
+                showScore    = showActualScore,
+                homeScore    = match.homeScore,
+                awayScore    = match.awayScore,
+                onBackground = onBackground,
+                accentColor  = accentColor
+            )
+        }
+
+        // ── Away player ───────────────────────────────────
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            PlayerFigure(
+                imageUrl    = awayImageUrl,
+                flagEmoji   = awayFlag,
+                isLive      = match.isLive,
+                isCutout    = awayImageUrl?.contains("/cutout/") == true
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = match.awayTeamTla,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = onBackground,
+                letterSpacing = 1.sp
+            )
+            if (awayStar.isNotBlank() && match.awayTeamTla != "TBD") {
+                Text(
+                    text = awayStar,
+                    fontSize = 9.sp,
+                    color = accentColor.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/**
+ * A player "figure" — either:
+ *  • A transparent-background cutout shown at full height (tall portrait, no clip)
+ *  • A regular headshot shown as a circular 52dp portrait
+ *  • The flag emoji as a fallback while loading or when no image is found
+ *
+ * The [isCutout] flag signals that the URL points to a PNG with transparency
+ * (the player floats on the card background without a circle mask).
+ */
+@Composable
+private fun PlayerFigure(
+    imageUrl: String?,
+    flagEmoji: String,
+    isLive: Boolean,
+    isCutout: Boolean
+) {
+    // Subtle scale pulse when live
+    val infiniteTransition = rememberInfiniteTransition(label = "playerPulse")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue  = if (isLive) 1.04f else 1f,
+        animationSpec = infiniteRepeatable(
+            tween(1_800, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "playerScale"
+    )
+
+    Crossfade(
+        targetState = imageUrl,
+        animationSpec = tween(600),
+        label = "playerImageFade"
+    ) { url ->
+        if (url != null) {
+            if (isCutout) {
+                // Transparent-background cutout — no circular clip, player "floats"
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(url)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .width(80.dp)
+                        .height(108.dp)
+                        .scale(scale)
+                )
+            } else {
+                // Regular thumb — circular crop
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(url)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .scale(scale)
+                    )
+                    // Tiny flag badge at bottom-right corner of portrait
+                    Text(
+                        text = flagEmoji,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .offset(x = 4.dp, y = 4.dp)
+                            .background(Color.Black.copy(alpha = 0.55f), CircleShape)
+                            .padding(2.dp)
+                    )
+                }
+            }
+        } else {
+            // Loading / no image — show flag emoji
+            Text(
+                text = flagEmoji,
+                fontSize = 48.sp,
+                modifier = Modifier.scale(scale)
+            )
         }
     }
 }

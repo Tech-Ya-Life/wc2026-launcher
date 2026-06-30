@@ -32,7 +32,8 @@ fun LauncherScreen(
     allMatches: List<Match>,
     showLiveScores: Boolean = true,
     standings: List<Standing> = emptyList(),
-    showStandings: Boolean = false
+    showStandings: Boolean = false,
+    playerImages: Map<String, String> = emptyMap()
 ) {
     Column(
         modifier = Modifier
@@ -51,14 +52,20 @@ fun LauncherScreen(
         // ── Match Card ─────────────────────────────────
         when {
             nextMatch != null ->
-                MatchCard(match = nextMatch, theme = theme, showScore = showLiveScores)
+                MatchCard(
+                    match = nextMatch,
+                    theme = theme,
+                    showScore = showLiveScores,
+                    playerImages = playerImages
+                )
 
             lastMatch != null ->
                 MatchCard(
                     match = lastMatch,
                     theme = theme,
                     showScore = showLiveScores,
-                    isRecentResult = true
+                    isRecentResult = true,
+                    playerImages = playerImages
                 )
 
             else ->
