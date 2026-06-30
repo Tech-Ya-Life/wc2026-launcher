@@ -1,13 +1,10 @@
 package com.wc2026.launcher.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.wc2026.launcher.schedule.Match
 import com.wc2026.launcher.theme.LauncherTheme
 
@@ -50,11 +47,7 @@ fun LauncherScreen(
         if (nextMatch != null) {
             MatchCard(match = nextMatch, theme = theme)
         } else {
-            Text(
-                text = "No upcoming matches",
-                color = theme.onBackground.copy(alpha = 0.6f),
-                fontSize = 14.sp
-            )
+            NoMatchesCard(onBackground = theme.onBackground)
         }
 
         Spacer(modifier = Modifier.weight(1f))

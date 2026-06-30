@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -81,13 +82,34 @@ fun AppIcon(app: AppInfo, accentColor: Color) {
                         ?.let { context.startActivity(it) }
                 }
             )
-            .padding(8.dp)
+            .padding(6.dp)
     ) {
-        Image(
-            bitmap = app.icon.toBitmap(width = 96, height = 96).asImageBitmap(),
-            contentDescription = app.label,
-            modifier = Modifier.size(52.dp)
-        )
+        // Football-themed icon: hexagonal/circular background with stitching colour ring
+        Box(contentAlignment = Alignment.Center) {
+            // Outer accent ring (simulates football panel outline)
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(accentColor.copy(alpha = 0.35f))
+            )
+            // White inner circle
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f))
+            )
+            // App icon
+            Image(
+                bitmap = app.icon.toBitmap(width = 96, height = 96).asImageBitmap(),
+                contentDescription = app.label,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+            )
+        }
+
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = app.label,
